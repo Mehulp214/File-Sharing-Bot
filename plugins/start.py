@@ -119,7 +119,7 @@ REPLY_ERROR = """<code>Use this command as a replay to any telegram message with
     
     
 
-@Bot.on_message(filters.command('start') & filters.private)
+"""@Bot.on_message(filters.command('start') & filters.private)
 async def not_joined(client: Client, message: Message):
     buttons = [
         [
@@ -151,7 +151,50 @@ async def not_joined(client: Client, message: Message):
         reply_markup = InlineKeyboardMarkup(buttons),
         quote = True,
         disable_web_page_preview = True
+    )"""
+
+
+
+#from config import FORCE_SUB_CHANNELS
+
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+
+@Bot.on_message(filters.command("start") & filters.private)
+async def not_joined(client: Client, message: Message):
+    FORCE_SUB_CHANNELS = [-1001740779320, -1002007661236]
+    buttons = []
+
+    # Generate buttons for all specified channels
+    for channel_id in FORCE_SUB_CHANNELS:
+        invite_link = await client.export_chat_invite_link(channel_id)
+        buttons.append([InlineKeyboardButton("Join Channel", url=invite_link)])
+
+    try:
+        buttons.append(
+            [
+                InlineKeyboardButton(
+                    text='Try Again',
+                    url=f"https://t.me/{client.username}?start={message.command[1]}"
+                )
+            ]
+        )
+    except IndexError:
+        pass
+
+    await message.reply(
+        text=FORCE_MSG.format(
+            first=message.from_user.first_name,
+            last=message.from_user.last_name,
+            username=None if not message.from_user.username else '@' + message.from_user.username,
+            mention=message.from_user.mention,
+            id=message.from_user.id
+        ),
+        reply_markup=InlineKeyboardMarkup(buttons),
+        quote=True,
+        disable_web_page_preview=True
     )
+
+
 
 
 
