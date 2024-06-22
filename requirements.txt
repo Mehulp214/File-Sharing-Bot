@@ -1,19 +1,19 @@
 # --- For-Bot-Working --------- #
-#pyrogram
-#TgCrypto
-#pyromod==1.5
+pyrogram
+TgCrypto
+pyromod==1.5
 # --- For-Database ------------ #
-#pymongo
+pymongo
 dnspython
 # --- For-Web-Response ------- #
 aiohttp
 
 
-asyncio==3.4.3
-pymongo==4.6.3
-pyrofork
-git+https://github.com/KurimuzonAkuma/pyrogram.git@v2.1.18
-pyromod==3.1.6
-pysocks==1.7.1
-regex==2023.12.25
-tgcrypto==1.2.5
+#asyncio==3.4.3
+#pymongo==4.6.3
+#pyrofork
+#git+https://github.com/KurimuzonAkuma/pyrogram.git@v2.1.18
+#pyromod==3.1.6
+#pysocks==1.7.1
+#regex==2023.12.25
+#tgcrypto==1.2.5
