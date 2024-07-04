@@ -66,7 +66,7 @@ async def start_command(client: Client, message: Message):
             return
         await temp_msg.delete()
         await message.reply_text(f"NOTE - THIS MESSAGE WILL BE DELTED AFTER {MIN} minutes. \n REASON - COPYRIGHT AND REPORT ISSUES.")
-        await 
+        
 
         for msg in messages:
             if bool(CUSTOM_CAPTION) & bool(msg.document):
