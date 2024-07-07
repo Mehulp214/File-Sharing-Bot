@@ -391,6 +391,7 @@ async def get_users(client: Bot, message: Message):
 
 @Bot.on_message(filters.private & filters.command('addfsub') & filters.user(ADMINS))
 async def add_fsub(client: Bot, message: Message):
+    print("HII")
     try:
         if len(message.command) != 2:
             await message.reply_text("Usage: /addfsub <channel_id>")
@@ -405,6 +406,7 @@ async def add_fsub(client: Bot, message: Message):
 
 @Bot.on_message(filters.private & filters.command('rmfsub') & filters.user(ADMINS))
 async def rm_fsub(client: Bot, message: Message):
+    print("HII")
     if len(message.command) != 2:
         await message.reply_text("Usage: /rmfsub <channel_id>")
         return
@@ -413,6 +415,11 @@ async def rm_fsub(client: Bot, message: Message):
     await remove_fsub_channel(channel_id)
     await message.reply_text(f"Channel {channel_id} removed from forced subscription list.")
 
+
+@Bot.on_message(filters.private & filters.command('listfsub1') & filters.user(ADMINS))
+async def list_fsub(client: Bot, message: Message):
+        print("HII")
+        
 @Bot.on_message(filters.private & filters.command('listfsub') & filters.user(ADMINS))
 async def list_fsub(client: Bot, message: Message):
     channels = await get_fsub_channels()
