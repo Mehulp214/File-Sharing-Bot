@@ -321,15 +321,29 @@ async def start_command(client: Client, message: Message):
         )
         return
 
+# @Bot.on_message(filters.command("addfsub") & filters.private & filters.user(ADMINS))
+# async def add_fsub(client: Client, message: Message):
+#     if len(message.command) != 2:
+#         await message.reply_text("Usage: /addfsub <channel_id>")
+#         return
+
+#     channel_id = int(message.command[1])
+#     await add_fsub_channel(channel_id)
+#     await message.reply_text(f"Channel {channel_id} added to forced subscription list.")
+
 @Bot.on_message(filters.command("addfsub") & filters.private & filters.user(ADMINS))
 async def add_fsub(client: Client, message: Message):
-    if len(message.command) != 2:
-        await message.reply_text("Usage: /addfsub <channel_id>")
-        return
+    try:
+        if len(message.command) != 2:
+            await message.reply_text("Usage: /addfsub <channel_id>")
+            return
 
-    channel_id = int(message.command[1])
-    await add_fsub_channel(channel_id)
-    await message.reply_text(f"Channel {channel_id} added to forced subscription list.")
+        channel_id = int(message.command[1])
+        await add_fsub_channel(channel_id)
+        await message.reply_text(f"Channel {channel_id} added to forced subscription list.")
+    except Exception as e:
+        await message.reply_text(f"Error adding channel: {e}")
+
 
 @Bot.on_message(filters.command("rmfsub") & filters.private & filters.user(ADMINS))
 async def rm_fsub(client: Client, message: Message):
