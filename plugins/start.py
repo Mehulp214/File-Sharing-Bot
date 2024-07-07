@@ -331,7 +331,7 @@ async def start_command(client: Client, message: Message):
 #     await add_fsub_channel(channel_id)
 #     await message.reply_text(f"Channel {channel_id} added to forced subscription list.")
 
-@Bot.on_message(filters.command("addfsub") & filters.private & filters.user(ADMINS))
+@Bot.on_message(filters.private & filters.command('addfsub') & filters.user(ADMINS))
 async def add_fsub(client: Client, message: Message):
     try:
         if len(message.command) != 2:
@@ -345,7 +345,7 @@ async def add_fsub(client: Client, message: Message):
         await message.reply_text(f"Error adding channel: {e}")
 
 
-@Bot.on_message(filters.command("rmfsub") & filters.private & filters.user(ADMINS))
+@Bot.on_message(filters.private & filters.command('rmfsub') & filters.user(ADMINS))
 async def rm_fsub(client: Client, message: Message):
     if len(message.command) != 2:
         await message.reply_text("Usage: /rmfsub <channel_id>")
@@ -355,7 +355,7 @@ async def rm_fsub(client: Client, message: Message):
     await remove_fsub_channel(channel_id)
     await message.reply_text(f"Channel {channel_id} removed from forced subscription list.")
 
-@Bot.on_message(filters.command("listfsub") & filters.private & filters.user(ADMINS))
+@Bot.on_message(filters.private & filters.command('listfsub') & filters.user(ADMINS))
 async def list_fsub(client: Client, message: Message):
     channels = await get_fsub_channels()
     if not channels:
@@ -365,12 +365,12 @@ async def list_fsub(client: Client, message: Message):
     channel_list = "\n".join([str(ch) for ch in channels])
     await message.reply_text(f"Forced subscription channels:\n{channel_list}")
 
-@Bot.on_message(filters.command("enablefsub") & filters.private & filters.user(ADMINS))
+@Bot.on_message(filters.private & filters.command('enablefsub') & filters.user(ADMINS))
 async def enable_fsub_command(client: Client, message: Message):
     await enable_fsub()
     await message.reply_text("Forced subscription enabled.")
 
-@Bot.on_message(filters.command("disablefsub") & filters.private & filters.user(ADMINS))
+@Bot.on_message(filters.private & filters.command('disablefsub') & filters.user(ADMINS))
 async def disable_fsub_command(client: Client, message: Message):
     await disable_fsub()
     await message.reply_text("Forced subscription disabled.")
