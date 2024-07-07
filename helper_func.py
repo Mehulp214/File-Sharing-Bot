@@ -126,7 +126,7 @@
 #     up_time += ":".join(time_list)
 
 
-#(©)Codexbotz
+#(©#(©)Codexbotz
 
 import base64
 import re
@@ -136,9 +136,12 @@ from pyrogram.enums import ChatMemberStatus
 from config import ADMINS
 from pyrogram.errors.exceptions.bad_request_400 import UserNotParticipant
 from pyrogram.errors import FloodWait
-from database.database import get_fsub_channels, add_fsub_channel, remove_fsub_channel
+from database.database import get_fsub_channels, add_fsub_channel, remove_fsub_channel, is_fsub_enabled
 
 async def is_subscribed(filter, client, update):
+    if not await is_fsub_enabled():
+        return True
+
     FORCE_SUB_CHANNEL = await get_fsub_channels()
     if not FORCE_SUB_CHANNEL:
         return True
@@ -241,7 +244,3 @@ def get_readable_time(seconds: int) -> str:
 
 subscribed = filters.create(is_subscribed)
 
-#     return up_time
-
-
-# subscribed = filters.create(is_subscribed)
