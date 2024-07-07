@@ -34,3 +34,21 @@ async def full_userbase():
 async def del_user(user_id: int):
     user_data.delete_one({'_id': user_id})
     return
+
+
+
+db = client['FSUB_BOT']
+
+def get_fsub_channels():
+    collection = db['fsub_channels']
+    channels = collection.find()
+    return [channel['channel_id'] for channel in channels]
+
+def add_fsub_channel(channel_id):
+    collection = db['fsub_channels']
+    collection.update_one({'channel_id': channel_id}, {'$set': {'channel_id': channel_id}}, upsert=True)
+
+def remove_fsub_channel(channel_id):
+    collection = db['fsub_channels']
+    collection.delete_one({'channel_id': channel_id})
+
