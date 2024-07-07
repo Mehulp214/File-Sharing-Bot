@@ -1,7 +1,212 @@
+# #(©)CodeXBotz
+
+
+
+
+# import os
+# import asyncio
+# from pyrogram import Client, filters, __version__
+# from pyrogram.enums import ParseMode
+# from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
+# from pyrogram.errors import FloodWait, UserIsBlocked, InputUserDeactivated
+
+# from bot import Bot
+# from config import ADMINS, FORCE_MSG, START_MSG, CUSTOM_CAPTION, DISABLE_CHANNEL_BUTTON, PROTECT_CONTENT
+# from helper_func import subscribed, encode, decode, get_messages
+# from database.database import add_user, del_user, full_userbase, present_user
+
+
+
+
+# DELETE_AFTER = 60  # Time in seconds after which the message should be deleted
+# MIN = DELETE_AFTER/60
+
+# @Bot.on_message(filters.command('start') & filters.private & subscribed)
+# async def start_command(client: Client, message: Message):
+#     id = message.from_user.id
+#     if not await present_user(id):
+#         try:
+#             await add_user(id)
+#         except:
+#             pass
+#     text = message.text
+#     if len(text) > 7:
+#         try:
+#             base64_string = text.split(" ", 1)[1]
+#         except:
+#             return
+#         string = await decode(base64_string)
+#         argument = string.split("-")
+#         if len(argument) == 3:
+#             try:
+#                 start = int(int(argument[1]) / abs(client.db_channel.id))
+#                 end = int(int(argument[2]) / abs(client.db_channel.id))
+#             except:
+#                 return
+#             if start <= end:
+#                 ids = range(start, end + 1)
+#             else:
+#                 ids = []
+#                 i = start
+#                 while True:
+#                     ids.append(i)
+#                     i -= 1
+#                     if i < end:
+#                         break
+#         elif len(argument) == 2:
+#             try:
+#                 ids = [int(int(argument[1]) / abs(client.db_channel.id))]
+#             except:
+#                 return
+#         temp_msg = await message.reply("Please wait...")
+#         try:
+#             messages = await get_messages(client, ids)
+#         except:
+#             await message.reply_text("Something went wrong..!")
+#             return
+#         await temp_msg.delete()
+        
+
+#         for msg in messages:
+#             if bool(CUSTOM_CAPTION) & bool(msg.document):
+#                 caption = CUSTOM_CAPTION.format(previouscaption="" if not msg.caption else msg.caption.html,
+#                                                 filename=msg.document.file_name)
+#             else:
+#                 caption = "" if not msg.caption else msg.caption.html
+
+#             if DISABLE_CHANNEL_BUTTON:
+#                 reply_markup = msg.reply_markup
+#             else:
+#                 reply_markup = None
+
+#             try:
+#                 sent_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML,
+#                                           reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
+#                 await asyncio.sleep(0.5)
+#                 await message.reply_text(f"**NOTE - THIS MESSAGE WILL BE DELTED AFTER {MIN} minutes. \n REASON - COPYRIGHT AND REPORT ISSUES.**")
+#                 await asyncio.sleep(DELETE_AFTER)  # Wait for DELETE_AFTER seconds
+#                 await sent_msg.delete()  # Delete the message
+#             except FloodWait as e:
+#                 await asyncio.sleep(e.x)
+#                 sent_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML,
+#                                           reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
+#                 await message.reply_text(f"**NOTE - THIS MESSAGE WILL BE DELTED AFTER {MIN} minutes. \n REASON - COPYRIGHT AND REPORT ISSUES.**")
+#                 await asyncio.sleep(DELETE_AFTER)  # Wait for DELETE_AFTER seconds
+#                 await sent_msg.delete()  # Delete the message
+#             except:
+#                 pass
+#         return
+#     else:
+#         reply_markup = InlineKeyboardMarkup(
+#             [
+#                 [
+#                     InlineKeyboardButton("😊 About Me", callback_data = "about"),
+#                     InlineKeyboardButton("🔒 Close", callback_data = "close")
+#                 ]
+#             ]
+#         )
+#         await message.reply_text(
+#             text = START_MSG.format(
+#                 first = message.from_user.first_name,
+#                 last = message.from_user.last_name,
+#                 username = None if not message.from_user.username else '@' + message.from_user.username,
+#                 mention = message.from_user.mention,
+#                 id = message.from_user.id
+#             ),
+#             reply_markup = reply_markup,
+#             disable_web_page_preview = True,
+#             quote = True
+#         )
+#         return
+
+    
+# #=====================================================================================##
+
+# WAIT_MSG = """"<b>Processing ...</b>"""
+
+# REPLY_ERROR = """<code>Use this command as a replay to any telegram message with out any spaces.</code>"""
+
+# #=====================================================================================##
+
+    
+    
+
+# """@Bot.on_message(filters.command('start') & filters.private)
+# async def not_joined(client: Client, message: Message):
+#     buttons = [
+#         [
+#             InlineKeyboardButton(
+#                 "Join Channel",
+#                 url = client.invitelink)
+#         ]
+#     ]
+#     try:
+#         buttons.append(
+#             [
+#                 InlineKeyboardButton(
+#                     text = 'Try Again',
+#                     url = f"https://t.me/{client.username}?start={message.command[1]}"
+#                 )
+#             ]
+#         )
+#     except IndexError:
+#         pass
+
+#     await message.reply(
+#         text = FORCE_MSG.format(
+#                 first = message.from_user.first_name,
+#                 last = message.from_user.last_name,
+#                 username = None if not message.from_user.username else '@' + message.from_user.username,
+#                 mention = message.from_user.mention,
+#                 id = message.from_user.id
+#             ),
+#         reply_markup = InlineKeyboardMarkup(buttons),
+#         quote = True,
+#         disable_web_page_preview = True
+#     )"""
+
+
+
+# #from config import FORCE_SUB_CHANNELS
+
+# from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+
+# @Bot.on_message(filters.command("start") & filters.private)
+# async def not_joined(client: Client, message: Message):
+#     FORCE_SUB_CHANNELS = [-1001740779320, -1002007661236]
+#     buttons = []
+
+#     # Generate buttons for all specified channels
+#     for channel_id in FORCE_SUB_CHANNELS:
+#         invite_link = await client.export_chat_invite_link(channel_id)
+#         buttons.append([InlineKeyboardButton("Join Channel", url=invite_link)])
+
+#     try:
+#         buttons.append(
+#             [
+#                 InlineKeyboardButton(
+#                     text='Try Again',
+#                     url=f"https://t.me/{client.username}?start={message.command[1]}"
+#                 )
+#             ]
+#         )
+#     except IndexError:
+#         pass
+
+#     await message.reply(
+#         text=FORCE_MSG.format(
+#             first=message.from_user.first_name,
+#             last=message.from_user.last_name,
+#             username=None if not message.from_user.username else '@' + message.from_user.username,
+#             mention=message.from_user.mention,
+#             id=message.from_user.id
+#         ),
+#         reply_markup=InlineKeyboardMarkup(buttons),
+#         quote=True,
+#         disable_web_page_preview=True
+#     )
+
 #(©)CodeXBotz
-
-
-
 
 import os
 import asyncio
@@ -13,10 +218,7 @@ from pyrogram.errors import FloodWait, UserIsBlocked, InputUserDeactivated
 from bot import Bot
 from config import ADMINS, FORCE_MSG, START_MSG, CUSTOM_CAPTION, DISABLE_CHANNEL_BUTTON, PROTECT_CONTENT
 from helper_func import subscribed, encode, decode, get_messages
-from database.database import add_user, del_user, full_userbase, present_user
-
-
-
+from database.database import add_user, del_user, full_userbase, present_user, add_fsub_channel, remove_fsub_channel, get_fsub_channels
 
 DELETE_AFTER = 60  # Time in seconds after which the message should be deleted
 MIN = DELETE_AFTER/60
@@ -83,14 +285,14 @@ async def start_command(client: Client, message: Message):
                 sent_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML,
                                           reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
                 await asyncio.sleep(0.5)
-                await message.reply_text(f"**NOTE - THIS MESSAGE WILL BE DELTED AFTER {MIN} minutes. \n REASON - COPYRIGHT AND REPORT ISSUES.**")
+                await message.reply_text(f"**NOTE - THIS MESSAGE WILL BE DELETED AFTER {MIN} minutes. \n REASON - COPYRIGHT AND REPORT ISSUES.**")
                 await asyncio.sleep(DELETE_AFTER)  # Wait for DELETE_AFTER seconds
                 await sent_msg.delete()  # Delete the message
             except FloodWait as e:
                 await asyncio.sleep(e.x)
                 sent_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML,
                                           reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
-                await message.reply_text(f"**NOTE - THIS MESSAGE WILL BE DELTED AFTER {MIN} minutes. \n REASON - COPYRIGHT AND REPORT ISSUES.**")
+                await message.reply_text(f"**NOTE - THIS MESSAGE WILL BE DELETED AFTER {MIN} minutes. \n REASON - COPYRIGHT AND REPORT ISSUES.**")
                 await asyncio.sleep(DELETE_AFTER)  # Wait for DELETE_AFTER seconds
                 await sent_msg.delete()  # Delete the message
             except:
@@ -119,61 +321,47 @@ async def start_command(client: Client, message: Message):
         )
         return
 
-    
+@Bot.on_message(filters.command("addfsub") & filters.private & filters.user(ADMINS))
+async def add_fsub(client: Client, message: Message):
+    if len(message.command) != 2:
+        await message.reply_text("Usage: /addfsub <channel_id>")
+        return
+
+    channel_id = int(message.command[1])
+    await add_fsub_channel(channel_id)
+    await message.reply_text(f"Channel {channel_id} added to forced subscription list.")
+
+@Bot.on_message(filters.command("rmfsub") & filters.private & filters.user(ADMINS))
+async def remove_fsub(client: Client, message: Message):
+    if len(message.command) != 2:
+        await message.reply_text("Usage: /rmfsub <channel_id>")
+        return
+
+    channel_id = int(message.command[1])
+    await remove_fsub_channel(channel_id)
+    await message.reply_text(f"Channel {channel_id} removed from forced subscription list.")
+
+@Bot.on_message(filters.command("listfsub") & filters.private & filters.user(ADMINS))
+async def list_fsub(client: Client, message: Message):
+    channels = await get_fsub_channels()
+    if not channels:
+        await message.reply_text("No channels in the forced subscription list.")
+        return
+
+    channel_list = "\n".join([str(ch) for ch in channels])
+    await message.reply_text(f"Forced subscription channels:\n{channel_list}")
+
 #=====================================================================================##
 
-WAIT_MSG = """"<b>Processing ...</b>"""
+WAIT_MSG = """<b>Processing ...</b>"""
 
-REPLY_ERROR = """<code>Use this command as a replay to any telegram message with out any spaces.</code>"""
+REPLY_ERROR = """<code>Use this command as a reply to any telegram message without any spaces.</code>"""
 
 #=====================================================================================##
-
-    
-    
-
-"""@Bot.on_message(filters.command('start') & filters.private)
-async def not_joined(client: Client, message: Message):
-    buttons = [
-        [
-            InlineKeyboardButton(
-                "Join Channel",
-                url = client.invitelink)
-        ]
-    ]
-    try:
-        buttons.append(
-            [
-                InlineKeyboardButton(
-                    text = 'Try Again',
-                    url = f"https://t.me/{client.username}?start={message.command[1]}"
-                )
-            ]
-        )
-    except IndexError:
-        pass
-
-    await message.reply(
-        text = FORCE_MSG.format(
-                first = message.from_user.first_name,
-                last = message.from_user.last_name,
-                username = None if not message.from_user.username else '@' + message.from_user.username,
-                mention = message.from_user.mention,
-                id = message.from_user.id
-            ),
-        reply_markup = InlineKeyboardMarkup(buttons),
-        quote = True,
-        disable_web_page_preview = True
-    )"""
-
-
-
-#from config import FORCE_SUB_CHANNELS
-
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 @Bot.on_message(filters.command("start") & filters.private)
 async def not_joined(client: Client, message: Message):
-    FORCE_SUB_CHANNELS = [-1001740779320, -1002007661236]
+    FORCE_SUB_CHANNELS = await get_fsub_channels()
     buttons = []
 
     # Generate buttons for all specified channels
@@ -205,6 +393,7 @@ async def not_joined(client: Client, message: Message):
         quote=True,
         disable_web_page_preview=True
     )
+
 
 
 
