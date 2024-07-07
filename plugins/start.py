@@ -218,7 +218,7 @@ from pyrogram.errors import FloodWait, UserIsBlocked, InputUserDeactivated
 from bot import Bot
 from config import ADMINS, FORCE_MSG, START_MSG, CUSTOM_CAPTION, DISABLE_CHANNEL_BUTTON, PROTECT_CONTENT
 from helper_func import subscribed, encode, decode, get_messages
-from database.database import add_user, del_user, full_userbase, present_user, add_fsub_channel, remove_fsub_channel, get_fsub_channels
+from database.database import add_user, del_user, full_userbase, present_user, add_fsub_channel, remove_fsub_channel, get_fsub_channels, enable_fsub, disable_fsub, is_fsub_enabled
 
 DELETE_AFTER = 60  # Time in seconds after which the message should be deleted
 MIN = DELETE_AFTER/60
@@ -332,7 +332,7 @@ async def add_fsub(client: Client, message: Message):
     await message.reply_text(f"Channel {channel_id} added to forced subscription list.")
 
 @Bot.on_message(filters.command("rmfsub") & filters.private & filters.user(ADMINS))
-async def remove_fsub(client: Client, message: Message):
+async def rm_fsub(client: Client, message: Message):
     if len(message.command) != 2:
         await message.reply_text("Usage: /rmfsub <channel_id>")
         return
@@ -351,6 +351,16 @@ async def list_fsub(client: Client, message: Message):
     channel_list = "\n".join([str(ch) for ch in channels])
     await message.reply_text(f"Forced subscription channels:\n{channel_list}")
 
+@Bot.on_message(filters.command("enablefsub") & filters.private & filters.user(ADMINS))
+async def enable_fsub_command(client: Client, message: Message):
+    await enable_fsub()
+    await message.reply_text("Forced subscription enabled.")
+
+@Bot.on_message(filters.command("disablefsub") & filters.private & filters.user(ADMINS))
+async def disable_fsub_command(client: Client, message: Message):
+    await disable_fsub()
+    await message.reply_text("Forced subscription disabled.")
+
 #=====================================================================================##
 
 WAIT_MSG = """<b>Processing ...</b>"""
@@ -361,6 +371,9 @@ REPLY_ERROR = """<code>Use this command as a reply to any telegram message witho
 
 @Bot.on_message(filters.command("start") & filters.private)
 async def not_joined(client: Client, message: Message):
+    if not await is_fsub_enabled():
+        return
+
     FORCE_SUB_CHANNELS = await get_fsub_channels()
     buttons = []
 
