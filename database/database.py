@@ -37,7 +37,7 @@ async def del_user(user_id: int):
 
 
 
-db = client['FSUB_BOT']
+db = dbclient['FSUB_BOT']
 
 def get_fsub_channels():
     collection = db['fsub_channels']
