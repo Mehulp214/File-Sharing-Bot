@@ -321,59 +321,6 @@ async def start_command(client: Client, message: Message):
         )
         return
 
-# @Bot.on_message(filters.command("addfsub") & filters.private & filters.user(ADMINS))
-# async def add_fsub(client: Client, message: Message):
-#     if len(message.command) != 2:
-#         await message.reply_text("Usage: /addfsub <channel_id>")
-#         return
-
-#     channel_id = int(message.command[1])
-#     await add_fsub_channel(channel_id)
-#     await message.reply_text(f"Channel {channel_id} added to forced subscription list.")
-
-@Bot.on_message(filters.private & filters.command('addfsub') & filters.user(ADMINS))
-async def add_fsub(client: Client, message: Message):
-    try:
-        if len(message.command) != 2:
-            await message.reply_text("Usage: /addfsub <channel_id>")
-            return
-
-        channel_id = int(message.command[1])
-        await add_fsub_channel(channel_id)
-        await message.reply_text(f"Channel {channel_id} added to forced subscription list.")
-    except Exception as e:
-        await message.reply_text(f"Error adding channel: {e}")
-
-
-@Bot.on_message(filters.private & filters.command('rmfsub') & filters.user(ADMINS))
-async def rm_fsub(client: Client, message: Message):
-    if len(message.command) != 2:
-        await message.reply_text("Usage: /rmfsub <channel_id>")
-        return
-
-    channel_id = int(message.command[1])
-    await remove_fsub_channel(channel_id)
-    await message.reply_text(f"Channel {channel_id} removed from forced subscription list.")
-
-@Bot.on_message(filters.private & filters.command('listfsub') & filters.user(ADMINS))
-async def list_fsub(client: Client, message: Message):
-    channels = await get_fsub_channels()
-    if not channels:
-        await message.reply_text("No channels in the forced subscription list.")
-        return
-
-    channel_list = "\n".join([str(ch) for ch in channels])
-    await message.reply_text(f"Forced subscription channels:\n{channel_list}")
-
-@Bot.on_message(filters.private & filters.command('enablefsub') & filters.user(ADMINS))
-async def enable_fsub_command(client: Client, message: Message):
-    await enable_fsub()
-    await message.reply_text("Forced subscription enabled.")
-
-@Bot.on_message(filters.private & filters.command('disablefsub') & filters.user(ADMINS))
-async def disable_fsub_command(client: Client, message: Message):
-    await disable_fsub()
-    await message.reply_text("Forced subscription disabled.")
 
 #=====================================================================================##
 
@@ -431,6 +378,61 @@ async def get_users(client: Bot, message: Message):
     msg = await client.send_message(chat_id=message.chat.id, text=WAIT_MSG)
     users = await full_userbase()
     await msg.edit(f"{len(users)} users are using this bot")
+
+# @Bot.on_message(filters.command("addfsub") & filters.private & filters.user(ADMINS))
+# async def add_fsub(client: Client, message: Message):
+#     if len(message.command) != 2:
+#         await message.reply_text("Usage: /addfsub <channel_id>")
+#         return
+
+#     channel_id = int(message.command[1])
+#     await add_fsub_channel(channel_id)
+#     await message.reply_text(f"Channel {channel_id} added to forced subscription list.")
+
+@Bot.on_message(filters.private & filters.command('addfsub') & filters.user(ADMINS))
+async def add_fsub(client: Client, message: Message):
+    try:
+        if len(message.command) != 2:
+            await message.reply_text("Usage: /addfsub <channel_id>")
+            return
+
+        channel_id = int(message.command[1])
+        await add_fsub_channel(channel_id)
+        await message.reply_text(f"Channel {channel_id} added to forced subscription list.")
+    except Exception as e:
+        await message.reply_text(f"Error adding channel: {e}")
+
+
+@Bot.on_message(filters.private & filters.command('rmfsub') & filters.user(ADMINS))
+async def rm_fsub(client: Client, message: Message):
+    if len(message.command) != 2:
+        await message.reply_text("Usage: /rmfsub <channel_id>")
+        return
+
+    channel_id = int(message.command[1])
+    await remove_fsub_channel(channel_id)
+    await message.reply_text(f"Channel {channel_id} removed from forced subscription list.")
+
+@Bot.on_message(filters.private & filters.command('listfsub') & filters.user(ADMINS))
+async def list_fsub(client: Client, message: Message):
+    channels = await get_fsub_channels()
+    if not channels:
+        await message.reply_text("No channels in the forced subscription list.")
+        return
+
+    channel_list = "\n".join([str(ch) for ch in channels])
+    await message.reply_text(f"Forced subscription channels:\n{channel_list}")
+
+@Bot.on_message(filters.private & filters.command('enablefsub') & filters.user(ADMINS))
+async def enable_fsub_command(client: Client, message: Message):
+    await enable_fsub()
+    await message.reply_text("Forced subscription enabled.")
+
+@Bot.on_message(filters.private & filters.command('disablefsub') & filters.user(ADMINS))
+async def disable_fsub_command(client: Client, message: Message):
+    await disable_fsub()
+    await message.reply_text("Forced subscription disabled.")
+
 
 @Bot.on_message(filters.private & filters.command('broadcast') & filters.user(ADMINS))
 async def send_text(client: Bot, message: Message):
