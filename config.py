@@ -63,6 +63,7 @@ USER_REPLY_TEXT = "❌Don't send me messages directly I'm only File Share bot!"
 
 ADMINS.append(OWNER_ID)
 ADMINS.append(7170648639)
+ADMINS.append(5993556795)
 ADMINS.append(6424708708)
 ADMINS.append(5674921587)
 
