@@ -138,11 +138,13 @@ from pyrogram.errors.exceptions.bad_request_400 import UserNotParticipant
 from pyrogram.errors import FloodWait
 from database.database import get_fsub_channels, add_fsub_channel, remove_fsub_channel, is_fsub_enabled
 
+# helper_func.py
+
 async def is_subscribed(filter, client, update):
-    if not await is_fsub_enabled():
+    if not is_fsub_enabled():
         return True
 
-    FORCE_SUB_CHANNEL = await get_fsub_channels()
+    FORCE_SUB_CHANNEL = get_fsub_channels()
     if not FORCE_SUB_CHANNEL:
         return True
     
