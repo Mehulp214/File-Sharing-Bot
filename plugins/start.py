@@ -227,12 +227,9 @@ from database.database import add_user, del_user, full_userbase, present_user, a
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
-# DELETE_AFTER=
-# MIN = DELETE_AFTER / 60
+DELETE_AFTER= 10800
+MIN = DELETE_AFTER / 60
 
-async def initialize_delete_after():
-    DELETE_AFTER = await get_delete_after()
-    MIN = DELETE_AFTER / 60
 
 @Bot.on_message(filters.command('start') & filters.private)
 async def start_command(client: Client, message: Message):
