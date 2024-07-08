@@ -99,7 +99,7 @@ async def admin_panel(client: Bot, message: Message):
     ])
     await message.reply_text("Admin Panel:", reply_markup=keyboard)
 
-    @Bot.on_callback_query(filters.regex("add_fsub"))
+@Bot.on_callback_query(filters.regex("add_fsub"))
 async def on_add_fsub(client: Bot, query):
     await query.message.reply_text("Please send the command `/addfsub <channel_id>`.")
 
