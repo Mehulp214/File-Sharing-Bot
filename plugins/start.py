@@ -216,6 +216,14 @@ from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.errors import FloodWait, UserNotParticipant
 from helper_func import subscribed, encode, decode, get_messages
 from database.database import add_user, present_user, get_fsub_channels, is_fsub_enabled
+import os
+import asyncio
+from pyrogram import Client, filters, __version__
+from pyrogram.enums import ParseMode
+from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
+from pyrogram.errors import FloodWait, UserIsBlocked, InputUserDeactivated
+
+from bot import Bot
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
