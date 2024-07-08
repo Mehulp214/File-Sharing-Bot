@@ -229,7 +229,9 @@ from database.database import add_user, del_user, full_userbase, present_user, a
 DELETE_AFTER = 60  # Time in seconds after which the message should be deleted
 MIN = DELETE_AFTER/60
 
-@Bot.on_message(filters.command('start') & filters.private & subscribed)
+# start.py
+
+@Bot.on_message(filters.command('start') & filters.private)
 async def start_command(client: Client, message: Message):
     id = message.from_user.id
     if not await present_user(id):
@@ -237,6 +239,30 @@ async def start_command(client: Client, message: Message):
             await add_user(id)
         except:
             pass
+
+    if await is_fsub_enabled():
+        FORCE_SUB_CHANNELS = get_fsub_channels()
+        for channel_id in FORCE_SUB_CHANNELS:
+            try:
+                member = await client.get_chat_member(chat_id=channel_id, user_id=id)
+                if member.status not in [ChatMemberStatus.OWNER, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.MEMBER]:
+                    raise UserNotParticipant
+            except UserNotParticipant:
+                invite_link = await client.export_chat_invite_link(channel_id)
+                await message.reply(
+                    text=FORCE_MSG.format(
+                        first=message.from_user.first_name,
+                        last=message.from_user.last_name,
+                        username=None if not message.from_user.username else '@' + message.from_user.username,
+                        mention=message.from_user.mention,
+                        id=message.from_user.id
+                    ),
+                    reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Join Channel", url=invite_link)]]),
+                    quote=True,
+                    disable_web_page_preview=True
+                )
+                return
+
     text = message.text
     if len(text) > 7:
         try:
@@ -274,7 +300,6 @@ async def start_command(client: Client, message: Message):
             return
         await temp_msg.delete()
         
-
         for msg in messages:
             if bool(CUSTOM_CAPTION) & bool(msg.document):
                 caption = CUSTOM_CAPTION.format(previouscaption="" if not msg.caption else msg.caption.html,
@@ -327,52 +352,6 @@ async def start_command(client: Client, message: Message):
         )
         return
 
-
-#=====================================================================================##
-
-WAIT_MSG = """<b>Processing ...</b>"""
-
-REPLY_ERROR = """<code>Use this command as a reply to any telegram message without any spaces.</code>"""
-
-#=====================================================================================##
-
-@Bot.on_message(filters.command("start") & filters.private)
-async def not_joined(client: Client, message: Message):
-    if not await is_fsub_enabled():
-        return
-
-    FORCE_SUB_CHANNELS = await get_fsub_channels()
-    buttons = []
-
-    # Generate buttons for all specified channels
-    for channel_id in FORCE_SUB_CHANNELS:
-        invite_link = await client.export_chat_invite_link(channel_id)
-        buttons.append([InlineKeyboardButton("Join Channel", url=invite_link)])
-
-    try:
-        buttons.append(
-            [
-                InlineKeyboardButton(
-                    text='Try Again',
-                    url=f"https://t.me/{client.username}?start={message.command[1]}"
-                )
-            ]
-        )
-    except IndexError:
-        pass
-
-    await message.reply(
-        text=FORCE_MSG.format(
-            first=message.from_user.first_name,
-            last=message.from_user.last_name,
-            username=None if not message.from_user.username else '@' + message.from_user.username,
-            mention=message.from_user.mention,
-            id=message.from_user.id
-        ),
-        reply_markup=InlineKeyboardMarkup(buttons),
-        quote=True,
-        disable_web_page_preview=True
-    )
 
 
 
