@@ -218,7 +218,7 @@ from pyrogram.enums import ParseMode, ChatMemberStatus
 from bot import Bot
 from config import ADMINS, FORCE_MSG, START_MSG, CUSTOM_CAPTION, DISABLE_CHANNEL_BUTTON, PROTECT_CONTENT
 from helper_func import subscribed, encode, decode, get_messages
-from database.database import add_user, del_user, full_userbase, present_user, add_fsub_channel, remove_fsub_channel, get_fsub_channels, enable_fsub, disable_fsub
+from database.database import add_user, del_user, full_userbase, present_user, add_fsub_channel, remove_fsub_channel, get_fsub_channels, enable_fsub, disable_fsub, get_delete_after, set_delete_after
 
 # You can continue with your script logic here...
 
@@ -228,7 +228,7 @@ from database.database import add_user, del_user, full_userbase, present_user, a
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
-DELETE_AFTER = 60  # Time in seconds after which the message should be deleted
+DELETE_AFTER = await get_delete_after()  # Time in seconds after which the message should be deleted
 MIN = DELETE_AFTER / 60
 
 @Bot.on_message(filters.command('start') & filters.private)
