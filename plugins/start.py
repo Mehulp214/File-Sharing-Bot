@@ -385,35 +385,12 @@ async def get_users(client: Bot, message: Message):
     users = await full_userbase()
     await msg.edit(f"{len(users)} users are using this bot")
 
-@Bot.on_message(filters.private & filters.command('broadcast1') & filters.user(ADMINS))
-async def listfsub(client: Bot, message: Message):
-    logger.info("Processing /broadcast1 command")
-    try:
-        channels = await get_fsub_channels()  # Ensure this is an async function
-        if not channels:
-            await message.reply_text("No channels in the forced subscription list.")
-            return
 
-        channel_list = "\n".join([str(ch) for ch in channels])
-        await message.reply_text(f"Forced subscription channels:\n{channel_list}")
-        logger.info("Listed forced subscription channels")
-    except Exception as e:
-        await message.reply_text(f"Error listing channels: {e}")
-        logger.error(f"Error listing channels: {e}")
 
 
 
 @Bot.on_message(filters.private & filters.command('broadcast') & filters.user(ADMINS))
 async def send_text(client: Bot, message: Message):
-    try:
-        print("HFuesfhesifushf")
-        await disable_fsub()
-        await message.reply_text("Forced subscription disabled.")
-        logger.info("Forced subscription disabled.")
-    except Exception as e:
-        await message.reply_text(f"Error disabling forced subscription: {e}")
-        logger.error(f"Error disabling forced subscription: {e}")
-
     if message.reply_to_message:
         query = await full_userbase()
         broadcast_msg = message.reply_to_message
