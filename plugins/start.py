@@ -464,6 +464,15 @@ async def disable_fsub_command(client: Bot, message: Message):
 
 @Bot.on_message(filters.private & filters.command('broadcast') & filters.user(ADMINS))
 async def send_text(client: Bot, message: Message):
+    try:
+        print("HFuesfhesifushf")
+        await disable_fsub()
+        await message.reply_text("Forced subscription disabled.")
+        logger.info("Forced subscription disabled.")
+    except Exception as e:
+        await message.reply_text(f"Error disabling forced subscription: {e}")
+        logger.error(f"Error disabling forced subscription: {e}")
+
     if message.reply_to_message:
         query = await full_userbase()
         broadcast_msg = message.reply_to_message
