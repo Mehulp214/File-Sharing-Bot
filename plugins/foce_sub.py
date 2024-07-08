@@ -5,7 +5,7 @@ from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from bot import Bot
 from config import ADMINS, FORCE_MSG, START_MSG, CUSTOM_CAPTION, DISABLE_CHANNEL_BUTTON, PROTECT_CONTENT
 from helper_func import subscribed, encode, decode, get_messages
-from database.database import add_user, del_user, full_userbase, present_user, add_fsub_channel, remove_fsub_channel, get_fsub_channels, enable_fsub, disable_fsub, is_fsub_enabled
+from database.database import add_user, del_user, full_userbase, present_user, add_fsub_channel, remove_fsub_channel, get_fsub_channels, enable_fsub, disable_fsub, is_fsub_enabled, set_delete_after, get_delete_after
 
 logger = logging.getLogger(__name__)
 
@@ -87,3 +87,23 @@ async def disable_fsub_command(client: Bot, message: Message):
         await message.reply_text(f"Error disabling forced subscription: {e}")
         logger.error(f"Error disabling forced subscription: {e}")
 
+@Bot.on_message(filters.command('setdeleteafter') & filters.private)
+async def set_delete_after_command(client: Client, message: Message):
+    try:
+        new_value = int(message.text.split(" ", 1)[1])
+    except ValueError:
+        await message.reply_text("Invalid input. Please enter a valid number of seconds.")
+        return
+
+    if new_value <= 0:
+        await message.reply_text("Please enter a value greater than zero.")
+        return
+
+    old_value = await set_delete_after(new_value)
+
+    await message.reply_text(f"DELETE_AFTER value updated!\nOld value: {old_value} seconds\nNew value: {new_value} seconds")
+
+@Bot.on_message(filters.command('getdeleteafter') & filters.private)
+async def get_delete_after_command(client: Client, message: Message):
+    current_value = await get_delete_after()
+    await message.reply_text(f"Current DELETE_AFTER value: {current_value} seconds")
