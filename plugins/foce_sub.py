@@ -9,7 +9,7 @@ from database.database import add_user, del_user, full_userbase, present_user, a
 
 logger = logging.getLogger(__name__)
 
-ADMIN_TEXT = "HELLO DEAR!! \n HERE ARE THE LIST OF ADMIN TOOLS!! \n\n /disablefsub - IT IS FOR DISABLING THE FSUB. \n\n /enablefsub - ENABLE FORCESUB \n\n /addfsub <CHANNEL_ID> - ADD CHANNEL AS FORCE SUB. \n\n /rmfsub <CHANNEL_ID> - REMOVE CHANNEL AS FORCE SUB. \n\n /listfsub - LIST OF ALL FSUB ADDED." 
+ADMIN_TEXT = "HELLO DEAR!! \n HERE ARE THE LIST OF ADMIN TOOLS!! \n\n /disablefsub - IT IS FOR DISABLING THE FSUB. \n\n /enablefsub - ENABLE FORCESUB \n\n /addfsub <CHANNEL_ID> - ADD CHANNEL AS FORCE SUB. \n\n /rmfsub <CHANNEL_ID> - REMOVE CHANNEL AS FORCE SUB. \n\n /listfsub - LIST OF ALL FSUB ADDED. \n\n /setdeleteafter - SET THE AUTO DELETE TIMER." 
 
 
 @Bot.on_message(filters.command('admin') & filters.private & filters.user(ADMINS))
