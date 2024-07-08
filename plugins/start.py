@@ -234,10 +234,12 @@ MIN = DELETE_AFTER / 60
 @Bot.on_message(filters.command('start') & filters.private)
 async def start_command(client: Client, message: Message):
     logger.debug("Start command received")
-    id = message.from_user.id
-    if not await present_user(id):
+    user_id = message.from_user.id
+    command_param = message.command[1] if len(message.command) > 1 else None
+
+    if not await present_user(user_id):
         try:
-            await add_user(id)
+            await add_user(user_id)
         except Exception as e:
             logger.error(f"Error adding user: {e}")
 
@@ -245,34 +247,26 @@ async def start_command(client: Client, message: Message):
         logger.debug("Forced subscription is enabled")
         FORCE_SUB_CHANNELS = await get_fsub_channels()
 
-        # Creating a list to hold InlineKeyboardButton instances
         buttons = []
-        try:
-            for channel_id in FORCE_SUB_CHANNELS:
-                try:
-                    member = await client.get_chat_member(chat_id=channel_id, user_id=id)
-                    if member.status not in [ChatMemberStatus.OWNER, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.MEMBER]:
-                        raise UserNotParticipant
-                except UserNotParticipant:
-                    invite_link = await client.export_chat_invite_link(channel_id)
-                    buttons.append([InlineKeyboardButton("Join Channel", url=invite_link)])
-                except Exception as e:
-                    logger.error(f"Error checking membership for channel {channel_id}: {e}")
-            
-            # Adding the "Try Again" button
-            buttons.append(
-                [
-                    InlineKeyboardButton(
-                        text="Try Again",
-                        url=f"https://t.me/{client.username}?start={message.command[1]}"
-                    )
-                ]
-            )
-        except IndexError:
-            pass  # Handle IndexError if message.command[1] is not present
+        all_channels_joined = True
+        for channel_id in FORCE_SUB_CHANNELS:
+            try:
+                member = await client.get_chat_member(chat_id=channel_id, user_id=user_id)
+                if member.status not in [ChatMemberStatus.OWNER, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.MEMBER]:
+                    raise UserNotParticipant
+            except UserNotParticipant:
+                all_channels_joined = False
+                invite_link = await client.export_chat_invite_link(channel_id)
+                buttons.append([InlineKeyboardButton("Join Channel", url=invite_link)])
+            except Exception as e:
+                logger.error(f"Error checking membership for channel {channel_id}: {e}")
 
-        # Reply with the message and the generated InlineKeyboardMarkup
-        if buttons:
+        if not all_channels_joined:
+            # Add the "Try Again" button if command_param is present
+            if command_param:
+                try_again_url = f"https://t.me/{client.username}?start={command_param}"
+                buttons.append([InlineKeyboardButton("Try Again", url=try_again_url)])
+
             reply_markup = InlineKeyboardMarkup(buttons)
             await message.reply(
                 text=FORCE_MSG.format(
@@ -286,103 +280,101 @@ async def start_command(client: Client, message: Message):
                 quote=True,
                 disable_web_page_preview=True
             )
-        else:
-            # Handle case where no buttons are added (possibly due to error or no channels)
-            await message.reply_text("No channels found or error occurred.")
-
-    else:
-        logger.debug("Forced subscription is disabled")
-
-    
-
-    text = message.text
-    if len(text) > 7:
-        try:
-            base64_string = text.split(" ", 1)[1]
-        except:
             return
-        string = await decode(base64_string)
-        argument = string.split("-")
-        if len(argument) == 3:
+
+    logger.debug("Forced subscription is disabled or all channels joined")
+
+    # Process the message if the user has joined all channels
+    if command_param:
+        text = message.text
+        if len(text) > 7:
             try:
-                start = int(int(argument[1]) / abs(client.db_channel.id))
-                end = int(int(argument[2]) / abs(client.db_channel.id))
+                base64_string = text.split(" ", 1)[1]
             except:
                 return
-            if start <= end:
-                ids = range(start, end + 1)
-            else:
-                ids = []
-                i = start
-                while True:
-                    ids.append(i)
-                    i -= 1
-                    if i < end:
-                        break
-        elif len(argument) == 2:
+            string = await decode(base64_string)
+            argument = string.split("-")
+            if len(argument) == 3:
+                try:
+                    start = int(int(argument[1]) / abs(client.db_channel.id))
+                    end = int(int(argument[2]) / abs(client.db_channel.id))
+                except:
+                    return
+                if start <= end:
+                    ids = range(start, end + 1)
+                else:
+                    ids = []
+                    i = start
+                    while True:
+                        ids.append(i)
+                        i -= 1
+                        if i < end:
+                            break
+            elif len(argument) == 2:
+                try:
+                    ids = [int(int(argument[1]) / abs(client.db_channel.id))]
+                except:
+                    return
+            temp_msg = await message.reply("Please wait...")
             try:
-                ids = [int(int(argument[1]) / abs(client.db_channel.id))]
+                messages = await get_messages(client, ids)
             except:
+                await message.reply_text("Something went wrong..!")
                 return
-        temp_msg = await message.reply("Please wait...")
-        try:
-            messages = await get_messages(client, ids)
-        except:
-            await message.reply_text("Something went wrong..!")
+            await temp_msg.delete()
+
+            for msg in messages:
+                if bool(CUSTOM_CAPTION) & bool(msg.document):
+                    caption = CUSTOM_CAPTION.format(previouscaption="" if not msg.caption else msg.caption.html,
+                                                    filename=msg.document.file_name)
+                else:
+                    caption = "" if not msg.caption else msg.caption.html
+
+                if DISABLE_CHANNEL_BUTTON:
+                    reply_markup = msg.reply_markup
+                else:
+                    reply_markup = None
+
+                try:
+                    sent_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML,
+                                              reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
+                    await asyncio.sleep(0.5)
+                    await message.reply_text(f"**NOTE - THIS MESSAGE WILL BE DELETED AFTER {MIN} minutes. \n REASON - COPYRIGHT AND REPORT ISSUES.**")
+                    await asyncio.sleep(DELETE_AFTER)  # Wait for DELETE_AFTER seconds
+                    await sent_msg.delete()  # Delete the message
+                except FloodWait as e:
+                    await asyncio.sleep(e.x)
+                    sent_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML,
+                                              reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
+                    await message.reply_text(f"**NOTE - THIS MESSAGE WILL BE DELETED AFTER {MIN} minutes. \n REASON - COPYRIGHT AND REPORT ISSUES.**")
+                    await asyncio.sleep(DELETE_AFTER)  # Wait for DELETE_AFTER seconds
+                    await sent_msg.delete()  # Delete the message
+                except:
+                    pass
             return
-        await temp_msg.delete()
-        
-        for msg in messages:
-            if bool(CUSTOM_CAPTION) & bool(msg.document):
-                caption = CUSTOM_CAPTION.format(previouscaption="" if not msg.caption else msg.caption.html,
-                                                filename=msg.document.file_name)
-            else:
-                caption = "" if not msg.caption else msg.caption.html
 
-            if DISABLE_CHANNEL_BUTTON:
-                reply_markup = msg.reply_markup
-            else:
-                reply_markup = None
-
-            try:
-                sent_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML,
-                                          reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
-                await asyncio.sleep(0.5)
-                await message.reply_text(f"**NOTE - THIS MESSAGE WILL BE DELETED AFTER {MIN} minutes. \n REASON - COPYRIGHT AND REPORT ISSUES.**")
-                await asyncio.sleep(DELETE_AFTER)  # Wait for DELETE_AFTER seconds
-                await sent_msg.delete()  # Delete the message
-            except FloodWait as e:
-                await asyncio.sleep(e.x)
-                sent_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML,
-                                          reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
-                await message.reply_text(f"**NOTE - THIS MESSAGE WILL BE DELETED AFTER {MIN} minutes. \n REASON - COPYRIGHT AND REPORT ISSUES.**")
-                await asyncio.sleep(DELETE_AFTER)  # Wait for DELETE_AFTER seconds
-                await sent_msg.delete()  # Delete the message
-            except:
-                pass
-        return
-    else:
-        reply_markup = InlineKeyboardMarkup(
+    # Default start message if no command_param or other actions
+    reply_markup = InlineKeyboardMarkup(
+        [
             [
-                [
-                    InlineKeyboardButton("😊 About Me", callback_data = "about"),
-                    InlineKeyboardButton("🔒 Close", callback_data = "close")
-                ]
+                InlineKeyboardButton("😊 About Me", callback_data="about"),
+                InlineKeyboardButton("🔒 Close", callback_data="close")
             ]
-        )
-        await message.reply_text(
-            text = START_MSG.format(
-                first = message.from_user.first_name,
-                last = message.from_user.last_name,
-                username = None if not message.from_user.username else '@' + message.from_user.username,
-                mention = message.from_user.mention,
-                id = message.from_user.id
-            ),
-            reply_markup = reply_markup,
-            disable_web_page_preview = True,
-            quote = True
-        )
-        return
+        ]
+    )
+    await message.reply_text(
+        text=START_MSG.format(
+            first=message.from_user.first_name,
+            last=message.from_user.last_name,
+            username=None if not message.from_user.username else '@' + message.from_user.username,
+            mention=message.from_user.mention,
+            id=message.from_user.id
+        ),
+        reply_markup=reply_markup,
+        disable_web_page_preview=True,
+        quote=True
+    )
+    return
 
 
 
