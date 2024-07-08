@@ -207,7 +207,7 @@
 #     )
 
 #(©)CodeXBotz
-
+import logging
 import os
 import asyncio
 from pyrogram import Client, filters, __version__
@@ -389,6 +389,25 @@ from helper_func import subscribed, encode, decode, get_messages
 from database.database import add_user, del_user, full_userbase, present_user, add_fsub_channel, remove_fsub_channel, get_fsub_channels, enable_fsub, disable_fsub, is_fsub_enabled
 
 logger = logging.getLogger(__name__)
+
+
+logging.basicConfig(level=logging.DEBUG)
+
+@Bot.on_message(filters.command('mehul') & filters.private & filters.user(ADMINS))
+async def add_fsub(client: Bot, message: Message):
+    logging.debug("add_fsub command invoked")
+    try:
+        if len(message.command) != 2:
+            await message.reply_text("Usage: /addfsub <channel_id>")
+            return
+
+        channel_id = int(message.command[1])
+        await add_fsub_channel(channel_id)
+        await message.reply_text(f"Channel {channel_id} added to forced subscription list.")
+    except Exception as e:
+        logging.error(f"Error in add_fsub: {e}")
+        await message.reply_text(f"Error adding channel: {e}")
+    logging.debug("add_fsub command completed")
 
 @Bot.on_message(filters.command('addfsub') & filters.private & filters.user(ADMINS))
 async def add_fsub(client: Bot, message: Message):
