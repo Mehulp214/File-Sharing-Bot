@@ -224,6 +224,20 @@ async def enable_fsub():
 async def disable_fsub():
     await settings_data.update_one({'name': 'fsub_enabled'}, {'$set': {'value': False}}, upsert=True)
 
+# Function to get the current DELETE_AFTER value
+async def get_delete_after():
+    setting = await settings_data.find_one({'name': 'delete_after'})
+    if setting:
+        return setting['value']
+    return 60  # Default value if not set
+
+# Function to set the DELETE_AFTER value
+async def set_delete_after(value):
+    old_value = await get_delete_after()
+    await settings_data.update_one({'name': 'delete_after'}, {'$set': {'value': value}}, upsert=True)
+    return old_value
+
+
 
 
 
