@@ -233,6 +233,7 @@ from database.database import add_user, del_user, full_userbase, present_user
 from pyrogram import filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from bot import Bot
+from pyrogram.errors.exceptions.bad_request_400 import UserNotParticipant
 from config import ADMINS
 from database.database import add_fsub_channel, remove_fsub_channel, get_fsub_channels, enable_fsub, disable_fsub
 
