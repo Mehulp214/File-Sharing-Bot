@@ -88,7 +88,7 @@ async def disable_fsub_command(client: Bot, message: Message):
         logger.error(f"Error disabling forced subscription: {e}")
 
 @Bot.on_message(filters.command('setdeleteafter') & filters.private)
-async def set_delete_after_command(client: Client, message: Message):
+async def set_delete_after_command(client: Bot, message: Message):
     try:
         new_value = int(message.text.split(" ", 1)[1])
     except ValueError:
@@ -104,6 +104,6 @@ async def set_delete_after_command(client: Client, message: Message):
     await message.reply_text(f"DELETE_AFTER value updated!\nOld value: {old_value} seconds\nNew value: {new_value} seconds")
 
 @Bot.on_message(filters.command('getdeleteafter') & filters.private)
-async def get_delete_after_command(client: Client, message: Message):
+async def get_delete_after_command(client: Bot, message: Message):
     current_value = await get_delete_after()
     await message.reply_text(f"Current DELETE_AFTER value: {current_value} seconds")
