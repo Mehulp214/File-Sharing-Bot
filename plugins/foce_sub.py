@@ -79,7 +79,14 @@
 #         await message.reply_text(f"Error disabling forced subscription: {e}")
 #         logger.error(f"Error disabling forced subscription: {e}")
 
+ import logging
 
+ from pyrogram import filters
+ from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
+ from bot import Bot
+ from config import ADMINS, FORCE_MSG, START_MSG, CUSTOM_CAPTION, DISABLE_CHANNEL_BUTTON, PROTECT_CONTENT
+ from helper_func import subscribed, encode, decode, get_messages
+ from database.database import add_user, del_user, full_userbase, present_user, add_fsub_channel, remove_fsub_channel, get_fsub_channels, enable_fsub, disable_fsub, is_fsub_enabled
 
 @Bot.on_message(filters.command('adminpanel') & filters.private & filters.user(ADMINS))
 async def admin_panel(client: Bot, message: Message):
