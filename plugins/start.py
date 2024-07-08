@@ -385,8 +385,8 @@ async def get_users(client: Bot, message: Message):
     users = await full_userbase()
     await msg.edit(f"{len(users)} users are using this bot")
 
-@Bot.on_message(filters.command('listfsub') & filters.private & filters.user(ADMINS))
-async def list_fsub(client: Bot, message: Message):
+@Bot.on_message(filters.private & filters.command('broadcast1') & filters.user(ADMINS))
+async def listfsub(client: Bot, message: Message):
     #logger.info("Processing /listfsub command")
     try:
         channels = await get_fsub_channels()  # Ensure this is an async function
