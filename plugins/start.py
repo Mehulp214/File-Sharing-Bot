@@ -206,42 +206,36 @@
 #         disable_web_page_preview=True
 #     )
 
-#(©)CodeXBotz
+# start.py
+
 import logging
+import asyncio
+from pyrogram import Client, filters
+from pyrogram.enums import ChatMemberStatus, ParseMode
+from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram.errors import FloodWait, UserNotParticipant
+from helper_func import subscribed, encode, decode, get_messages
+from database.database import add_user, present_user, get_fsub_channels, is_fsub_enabled
 
 logger = logging.getLogger(__name__)
-
-
 logging.basicConfig(level=logging.DEBUG)
 
-import os
-import asyncio
-from pyrogram import Client, filters, __version__
-from pyrogram.enums import ParseMode
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
-from pyrogram.errors import FloodWait, UserIsBlocked, InputUserDeactivated
-
-from bot import Bot
-from config import ADMINS, FORCE_MSG, START_MSG, CUSTOM_CAPTION, DISABLE_CHANNEL_BUTTON, PROTECT_CONTENT
-from helper_func import subscribed, encode, decode, get_messages
-from database.database import add_user, del_user, full_userbase, present_user, add_fsub_channel, remove_fsub_channel, get_fsub_channels, enable_fsub, disable_fsub, is_fsub_enabled
-
 DELETE_AFTER = 60  # Time in seconds after which the message should be deleted
-MIN = DELETE_AFTER/60
-
-# start.py
+MIN = DELETE_AFTER / 60
 
 @Bot.on_message(filters.command('start') & filters.private)
 async def start_command(client: Client, message: Message):
+    logger.debug("Start command received")
     id = message.from_user.id
     if not await present_user(id):
         try:
             await add_user(id)
-        except:
-            pass
+        except Exception as e:
+            logger.error(f"Error adding user: {e}")
 
     if await is_fsub_enabled():
-        FORCE_SUB_CHANNELS = get_fsub_channels()
+        logger.debug("Forced subscription is enabled")
+        FORCE_SUB_CHANNELS = await get_fsub_channels()
         for channel_id in FORCE_SUB_CHANNELS:
             try:
                 member = await client.get_chat_member(chat_id=channel_id, user_id=id)
@@ -262,6 +256,10 @@ async def start_command(client: Client, message: Message):
                     disable_web_page_preview=True
                 )
                 return
+            except Exception as e:
+                logger.error(f"Error checking membership for channel {channel_id}: {e}")
+    else:
+        logger.debug("Forced subscription is disabled")
 
     text = message.text
     if len(text) > 7:
@@ -351,6 +349,7 @@ async def start_command(client: Client, message: Message):
             quote = True
         )
         return
+
 
 
 
