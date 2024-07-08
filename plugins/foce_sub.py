@@ -99,77 +99,30 @@ async def admin_panel(client: Bot, message: Message):
     ])
     await message.reply_text("Admin Panel:", reply_markup=keyboard)
 
-@Bot.on_callback_query(filters.regex("add_fsub"))
-async def on_add_fsub(client: Bot, query: CallbackQuery):
-    await query.message.reply_text("Please send the channel ID to add to the forced subscription list:")
-    client.waiting_for_channel_id = "add_fsub"
-    await query.answer()
-
-@Bot.on_message(filters.private & filters.user(ADMINS) & filters.reply)
-async def handle_channel_id(client: Bot, message: Message):
-    if getattr(client, "waiting_for_channel_id", None) == "add_fsub":
-        try:
-            channel_id = int(message.text)
-            add_fsub_channel(channel_id)
-            await message.reply_text(f"Channel {channel_id} added to the forced subscription list.")
-            client.waiting_for_channel_id = None
-        except ValueError:
-            await message.reply_text("Invalid channel ID. Please send a valid channel ID.")
-        except Exception as e:
-            await message.reply_text(f"Error adding channel: {e}")
-            logger.error(f"Error adding channel: {e}")
+    @Bot.on_callback_query(filters.regex("add_fsub"))
+async def on_add_fsub(client: Bot, query):
+    await query.message.reply_text("Please send the command `/addfsub <channel_id>`.")
 
 @Bot.on_callback_query(filters.regex("rm_fsub"))
-async def on_rm_fsub(client: Bot, query: CallbackQuery):
-    await query.message.reply_text("Please send the channel ID to remove from the forced subscription list:")
-    client.waiting_for_channel_id = "rm_fsub"
-    await query.answer()
-
-@Bot.on_message(filters.private & filters.user(ADMINS) & filters.reply)
-async def handle_channel_id(client: Bot, message: Message):
-    if getattr(client, "waiting_for_channel_id", None) == "rm_fsub":
-        try:
-            channel_id = int(message.text)
-            remove_fsub_channel(channel_id)
-            await message.reply_text(f"Channel {channel_id} removed from the forced subscription list.")
-            client.waiting_for_channel_id = None
-        except ValueError:
-            await message.reply_text("Invalid channel ID. Please send a valid channel ID.")
-        except Exception as e:
-            await message.reply_text(f"Error removing channel: {e}")
-            logger.error(f"Error removing channel: {e}")
+async def on_rm_fsub(client: Bot, query):
+    await query.message.reply_text("Please send the command `/rmfsub <channel_id>`.")
 
 @Bot.on_callback_query(filters.regex("list_fsub"))
-async def on_list_fsub(client: Bot, query: CallbackQuery):
-    try:
-        channels = get_fsub_channels()
-        if not channels:
-            await query.message.edit_text("No channels in the forced subscription list.")
-        else:
-            channel_list = "\n".join([str(ch) for ch in channels])
-            await query.message.edit_text(f"Forced subscription channels:\n{channel_list}")
-    except Exception as e:
-        await query.message.edit_text(f"Error listing channels: {e}")
-        logger.error(f"Error listing channels: {e}")
-    await query.answer()
+async def on_list_fsub(client: Bot, query):
+    channels = await get_fsub_channels()
+    if not channels:
+        await query.message.edit_text("No channels in the forced subscription list.")
+        return
+
+    channel_list = "\n".join([str(ch) for ch in channels])
+    await query.message.edit_text(f"Forced subscription channels:\n{channel_list}")
 
 @Bot.on_callback_query(filters.regex("enable_fsub"))
-async def on_enable_fsub(client: Bot, query: CallbackQuery):
-    try:
-        enable_fsub()
-        await query.message.edit_text("Forced subscription enabled.")
-    except Exception as e:
-        await query.message.edit_text(f"Error enabling forced subscription: {e}")
-        logger.error(f"Error enabling forced subscription: {e}")
-    await query.answer()
+async def on_enable_fsub(client: Bot, query):
+    await enable_fsub()
+    await query.message.edit_text("Forced subscription enabled.")
 
 @Bot.on_callback_query(filters.regex("disable_fsub"))
-async def on_disable_fsub(client: Bot, query: CallbackQuery):
-    try:
-        disable_fsub()
-        await query.message.edit_text("Forced subscription disabled.")
-    except Exception as e:
-        await query.message.edit_text(f"Error disabling forced subscription: {e}")
-        logger.error(f"Error disabling forced subscription: {e}")
-    await query.answer()
-
+async def on_disable_fsub(client: Bot, query):
+    await disable_fsub()
+    await query.message.edit_text("Forced subscription disabled.")
