@@ -244,30 +244,56 @@ async def start_command(client: Client, message: Message):
     if await is_fsub_enabled():
         logger.debug("Forced subscription is enabled")
         FORCE_SUB_CHANNELS = await get_fsub_channels()
-        for channel_id in FORCE_SUB_CHANNELS:
-            try:
-                member = await client.get_chat_member(chat_id=channel_id, user_id=id)
-                if member.status not in [ChatMemberStatus.OWNER, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.MEMBER]:
-                    raise UserNotParticipant
-            except UserNotParticipant:
-                invite_link = await client.export_chat_invite_link(channel_id)
-                await message.reply(
-                    text=FORCE_MSG.format(
-                        first=message.from_user.first_name,
-                        last=message.from_user.last_name,
-                        username=None if not message.from_user.username else '@' + message.from_user.username,
-                        mention=message.from_user.mention,
-                        id=message.from_user.id
-                    ),
-                    reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Join Channel", url=invite_link)]]),
-                    quote=True,
-                    disable_web_page_preview=True
-                )
-                return
-            except Exception as e:
-                logger.error(f"Error checking membership for channel {channel_id}: {e}")
+
+        # Creating a list to hold InlineKeyboardButton instances
+        buttons = []
+        try:
+            for channel_id in FORCE_SUB_CHANNELS:
+                try:
+                    member = await client.get_chat_member(chat_id=channel_id, user_id=id)
+                    if member.status not in [ChatMemberStatus.OWNER, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.MEMBER]:
+                        raise UserNotParticipant
+                except UserNotParticipant:
+                    invite_link = await client.export_chat_invite_link(channel_id)
+                    buttons.append([InlineKeyboardButton("Join Channel", url=invite_link)])
+                except Exception as e:
+                    logger.error(f"Error checking membership for channel {channel_id}: {e}")
+            
+            # Adding the "Try Again" button
+            buttons.append(
+                [
+                    InlineKeyboardButton(
+                        text="Try Again",
+                        url=f"https://t.me/{client.username}?start={message.command[1]}"
+                    )
+                ]
+            )
+        except IndexError:
+            pass  # Handle IndexError if message.command[1] is not present
+
+        # Reply with the message and the generated InlineKeyboardMarkup
+        if buttons:
+            reply_markup = InlineKeyboardMarkup(buttons)
+            await message.reply(
+                text=FORCE_MSG.format(
+                    first=message.from_user.first_name,
+                    last=message.from_user.last_name,
+                    username=None if not message.from_user.username else '@' + message.from_user.username,
+                    mention=message.from_user.mention,
+                    id=message.from_user.id
+                ),
+                reply_markup=reply_markup,
+                quote=True,
+                disable_web_page_preview=True
+            )
+        else:
+            # Handle case where no buttons are added (possibly due to error or no channels)
+            await message.reply_text("No channels found or error occurred.")
+
     else:
         logger.debug("Forced subscription is disabled")
+
+    
 
     text = message.text
     if len(text) > 7:
