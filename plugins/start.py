@@ -234,14 +234,12 @@ MIN = DELETE_AFTER / 60
 
 
 
-# Set DELETE_AFTER and MIN at startup
-DELETE_AFTER = int(get_delete_after())
-MIN = DELETE_AFTER/60
+
 
 
 @Bot.on_message(filters.command('start') & filters.private)
 async def start_command(client: Client, message: Message):
-    logger.debug("Start command received")
+    #logger.debug("Start command received")
     user_id = message.from_user.id
     command_param = message.command[1] if len(message.command) > 1 else None
 
@@ -252,7 +250,7 @@ async def start_command(client: Client, message: Message):
             logger.error(f"Error adding user: {e}")
 
     if await is_fsub_enabled():
-        logger.debug("Forced subscription is enabled")
+        #logger.debug("Forced subscription is enabled")
         FORCE_SUB_CHANNELS = await get_fsub_channels()
 
         buttons = []
