@@ -338,14 +338,14 @@ async def start_command(client: Client, message: Message):
                                               reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
                     await asyncio.sleep(0.5)
                     await message.reply_text(f"**NOTE - THIS MESSAGE WILL BE DELETED AFTER {MIN} minutes. \n REASON - COPYRIGHT AND REPORT ISSUES.**")
-                    await asyncio.sleep(DELETE_AFTER)  # Wait for DELETE_AFTER seconds
+                    #await asyncio.sleep(DELETE_AFTER)  # Wait for DELETE_AFTER seconds
                     await sent_msg.delete()  # Delete the message
                 except FloodWait as e:
                     await asyncio.sleep(e.x)
                     sent_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML,
                                               reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
                     await message.reply_text(f"**NOTE - THIS MESSAGE WILL BE DELETED AFTER {MIN} minutes. \n REASON - COPYRIGHT AND REPORT ISSUES.**")
-                    await asyncio.sleep(DELETE_AFTER)  # Wait for DELETE_AFTER seconds
+                    #await asyncio.sleep(DELETE_AFTER)  # Wait for DELETE_AFTER seconds
                     await sent_msg.delete()  # Delete the message
                 except:
                     pass
