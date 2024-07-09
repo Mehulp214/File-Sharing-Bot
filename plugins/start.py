@@ -235,7 +235,7 @@ MIN = DELETE_AFTER / 60
 
 
 # Set DELETE_AFTER and MIN at startup
-DELETE_AFTER = get_delete_after_sync()
+DELETE_AFTER = get_delete_after()
 MIN = DELETE_AFTER / 60 if DELETE_AFTER > 0 else 0
 
 
