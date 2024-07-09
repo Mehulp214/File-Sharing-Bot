@@ -227,13 +227,12 @@ from database.database import add_user, del_user, full_userbase, present_user, a
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
-# DELETE_AFTER= 10800
-# MIN = DELETE_AFTER / 60
 
 
-def get_delete_after_sync():
-    loop = asyncio.get_event_loop()
-    return loop.run_until_complete(get_delete_after())
+DELETE_AFTER= 10800
+MIN = DELETE_AFTER / 60
+
+
 
 # Set DELETE_AFTER and MIN at startup
 DELETE_AFTER = get_delete_after_sync()
