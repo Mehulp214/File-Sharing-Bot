@@ -227,8 +227,17 @@ from database.database import add_user, del_user, full_userbase, present_user, a
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
-DELETE_AFTER= 10800
-MIN = DELETE_AFTER / 60
+# DELETE_AFTER= 10800
+# MIN = DELETE_AFTER / 60
+
+
+def get_delete_after_sync():
+    loop = asyncio.get_event_loop()
+    return loop.run_until_complete(get_delete_after())
+
+# Set DELETE_AFTER and MIN at startup
+DELETE_AFTER = get_delete_after_sync()
+MIN = DELETE_AFTER / 60 if DELETE_AFTER > 0 else 0
 
 
 @Bot.on_message(filters.command('start') & filters.private)
@@ -335,20 +344,22 @@ async def start_command(client: Client, message: Message):
                 else:
                     reply_markup = None
 
-                try:
+                 try:
                     sent_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML,
                                               reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
                     await asyncio.sleep(0.5)
-                    await message.reply_text(f"**NOTE - THIS MESSAGE WILL BE DELETED AFTER {MIN} minutes. \n REASON - COPYRIGHT AND REPORT ISSUES.**")
-                    await asyncio.sleep(DELETE_AFTER)  # Wait for DELETE_AFTER seconds
-                    await sent_msg.delete()  # Delete the message
+                    if DELETE_AFTER > 0:
+                        await message.reply_text(f"**NOTE - THIS MESSAGE WILL BE DELETED AFTER {MIN} minutes. \n REASON - COPYRIGHT AND REPORT ISSUES.**")
+                        await asyncio.sleep(DELETE_AFTER)  # Wait for DELETE_AFTER seconds
+                        await sent_msg.delete()  # Delete the message
                 except FloodWait as e:
                     await asyncio.sleep(e.x)
                     sent_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML,
                                               reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
-                    await message.reply_text(f"**NOTE - THIS MESSAGE WILL BE DELETED AFTER {MIN} minutes. \n REASON - COPYRIGHT AND REPORT ISSUES.**")
-                    await asyncio.sleep(DELETE_AFTER)  # Wait for DELETE_AFTER seconds
-                    await sent_msg.delete()  # Delete the message
+                    if DELETE_AFTER > 0:
+                        await message.reply_text(f"**NOTE - THIS MESSAGE WILL BE DELETED AFTER {MIN} minutes. \n REASON - COPYRIGHT AND REPORT ISSUES.**")
+                        await asyncio.sleep(DELETE_AFTER)  # Wait for DELETE_AFTER seconds
+                        await sent_msg.delete()  # Delete the message
                 except:
                     pass
             return
