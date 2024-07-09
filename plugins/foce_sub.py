@@ -95,8 +95,8 @@ async def set_delete_after_command(client: Bot, message: Message):
         await message.reply_text("Invalid input. Please enter a valid number of seconds.")
         return
 
-    if new_value <= 0:
-        await message.reply_text("Please enter a value greater than zero.")
+    if new_value < 0:
+        await message.reply_text("Please enter a value greater than zero or 0.")
         return
 
     old_value = await set_delete_after(new_value)
