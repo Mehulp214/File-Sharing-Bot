@@ -318,6 +318,7 @@ async def start_command(client: Client, message: Message):
                     return
             temp_msg = await message.reply("Please wait...")
             h = await message.reply_text(f"<b><u>❗️❗️❗️IMPORTANT❗️️❗️❗️</u></b>\n\nThis Movie File/Video will be deleted in <b><u>{AUTO_DELETE_TIME} minutes</u> 🫥 <i></b>(Due to Copyright Issues)</i>.\n\n<b><i>Please forward this File/Video to your Saved Messages and Start Download there</b>")
+            asyncio.create_task(delete_after_delay(h, DELETE_AFTER))
             try:
                 messages = await get_messages(client, ids)
             except:
