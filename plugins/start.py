@@ -236,7 +236,7 @@ MIN = DELETE_AFTER / 60
 
 # Set DELETE_AFTER and MIN at startup
 DELETE_AFTER = get_delete_after()
-MIN = DELETE_AFTER / 60 if DELETE_AFTER > 0 else 0
+MIN = DELETE_AFTER / 60
 
 
 @Bot.on_message(filters.command('start') & filters.private)
