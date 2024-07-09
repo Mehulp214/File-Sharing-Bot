@@ -341,15 +341,15 @@ async def start_command(client: Client, message: Message):
                     sent_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML,
                                               reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
                     await asyncio.sleep(0.5)
-                    h = await message.reply_text(f"<b><u>❗️❗️❗️IMPORTANT❗️️❗️❗️</u></b>\n\nThis Movie File/Video will be deleted in <b><u>{AUTO_DELETE_TIME} minutes</u> 🫥 <i></b>(Due to Copyright Issues)</i>.\n\n<b><i>Please forward this File/Video to your Saved Messages and Start Download there</b>")
+                    
                     asyncio.create_task(delete_after_delay(sent_msg, DELETE_AFTER))
-                    asyncio.create_task(delete_after_delay(h, DELETE_AFTER))
+                    #asyncio.create_task(delete_after_delay(h, DELETE_AFTER))
                     
                 except FloodWait as e:
                     await asyncio.sleep(e.x)
                     sent_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML,
                                               reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
-                    
+                    h = await message.reply_text(f"<b><u>❗️❗️❗️IMPORTANT❗️️❗️❗️</u></b>\n\nThis Movie File/Video will be deleted in <b><u>{AUTO_DELETE_TIME} minutes</u> 🫥 <i></b>(Due to Copyright Issues)</i>.\n\n<b><i>Please forward this File/Video to your Saved Messages and Start Download there</b>")
                     asyncio.create_task(delete_after_delay(sent_msg, DELETE_AFTER))
                     asyncio.create_task(delete_after_delay(h, DELETE_AFTER))
                 except Exception as e:
