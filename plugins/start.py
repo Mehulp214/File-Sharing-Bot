@@ -225,7 +225,7 @@ from database.database import add_user, del_user, full_userbase, present_user, a
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
-DELETE_AFTER = 10800
+DELETE_AFTER = 30
 AUTO_DELETE_TIME = DELETE_AFTER / 60
 
 
@@ -337,17 +337,17 @@ async def start_command(client: Client, message: Message):
                     sent_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML,
                                               reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
                     await asyncio.sleep(0.5)
-                    h = await message.reply_text(f"<b><u>❗️❗️❗️IMPORTANT❗️️❗️❗️</u></b>\n\nThis Movie File/Video will be deleted in <b><u>{AUTO_DELETE} minutes</u> 🫥 <i></b>(Due to Copyright Issues)</i>.\n\n<b><i>Please forward this File/Video to your Saved Messages and Start Download there</b>")
-                    asyncio.create_task(delete_after_delay(sent_msg, AUTO_DELETE_TIME))
-                    asyncio.create_task(delete_after_delay(h, AUTO_DELETE_TIME))
+                    h = await message.reply_text(f"<b><u>❗️❗️❗️IMPORTANT❗️️❗️❗️</u></b>\n\nThis Movie File/Video will be deleted in <b><u>{AUTO_DELETE_TIME} minutes</u> 🫥 <i></b>(Due to Copyright Issues)</i>.\n\n<b><i>Please forward this File/Video to your Saved Messages and Start Download there</b>")
+                    asyncio.create_task(delete_after_delay(sent_msg, DELETE_AFTER))
+                    asyncio.create_task(delete_after_delay(h, DELETE_AFTER))
                     
                 except FloodWait as e:
                     await asyncio.sleep(e.x)
                     sent_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML,
                                               reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
-                    h = await message.reply_text(f"<b><u>❗️❗️❗️IMPORTANT❗️️❗️❗️</u></b>\n\nThis Movie File/Video will be deleted in <b><u>{AUTO_DELETE} minutes</u> 🫥 <i></b>(Due to Copyright Issues)</i>.\n\n<b><i>Please forward this File/Video to your Saved Messages and Start Download there</b>")
-                    asyncio.create_task(delete_after_delay(sent_msg, AUTO_DELETE_TIME))
-                    asyncio.create_task(delete_after_delay(h, AUTO_DELETE_TIME))
+                    h = await message.reply_text(f"<b><u>❗️❗️❗️IMPORTANT❗️️❗️❗️</u></b>\n\nThis Movie File/Video will be deleted in <b><u>{AUTO_DELETE_TIME} minutes</u> 🫥 <i></b>(Due to Copyright Issues)</i>.\n\n<b><i>Please forward this File/Video to your Saved Messages and Start Download there</b>")
+                    asyncio.create_task(delete_after_delay(sent_msg, DELETE_AFTER))
+                    asyncio.create_task(delete_after_delay(h, DELETE_AFTER))
                 except Exception as e:
                     err=await message.reply_text(e)
                     pass
