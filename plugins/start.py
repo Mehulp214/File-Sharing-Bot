@@ -208,38 +208,14 @@
 
 # start.py
 
-import logging
-import asyncio
-from pyrogram import filters, Client
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
-from pyrogram.errors import FloodWait, UserIsBlocked, InputUserDeactivated, UserNotParticipant
-from pyrogram.enums import ParseMode, ChatMemberStatus
-
-from bot import Bot
-from config import ADMINS, FORCE_MSG, START_MSG, CUSTOM_CAPTION, DISABLE_CHANNEL_BUTTON, PROTECT_CONTENT
-from helper_func import subscribed, encode, decode, get_messages
-from database.database import add_user, del_user, full_userbase, present_user, add_fsub_channel, remove_fsub_channel, get_fsub_channels, enable_fsub, disable_fsub, get_delete_after, set_delete_after,is_fsub_enabled
-
-# You can continue with your script logic here...
-
-
-
-
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
-
-DELETE_AFTER= 10800
+DELETE_AFTER = 10800
 MIN = DELETE_AFTER / 60
 
-
-
-
-
-
-@Bot.on_message(filters.command('start') & filters.private)
+@Bot.on_message(filters.command('start') & filters.private & subscribed)
 async def start_command(client: Client, message: Message):
-    #logger.debug("Start command received")
     user_id = message.from_user.id
     command_param = message.command[1] if len(message.command) > 1 else None
 
@@ -250,7 +226,6 @@ async def start_command(client: Client, message: Message):
             logger.error(f"Error adding user: {e}")
 
     if await is_fsub_enabled():
-        #logger.debug("Forced subscription is enabled")
         FORCE_SUB_CHANNELS = await get_fsub_channels()
 
         buttons = []
@@ -268,14 +243,13 @@ async def start_command(client: Client, message: Message):
                 logger.error(f"Error checking membership for channel {channel_id}: {e}")
 
         if not all_channels_joined:
-            # Add the "Try Again" button if command_param is present
             if command_param:
                 try_again_url = f"https://t.me/{client.username}?start={command_param}"
                 buttons.append([InlineKeyboardButton("Try Again", url=try_again_url)])
 
             reply_markup = InlineKeyboardMarkup(buttons)
             await message.reply(
-                text=FORCE_MSG.format(
+                text=START_MSG.format(
                     first=message.from_user.first_name,
                     last=message.from_user.last_name,
                     username=None if not message.from_user.username else '@' + message.from_user.username,
@@ -288,80 +262,61 @@ async def start_command(client: Client, message: Message):
             )
             return
 
-    logger.debug("Forced subscription is disabled or all channels joined")
-
-    # Process the message if the user has joined all channels
     if command_param:
         text = message.text
         if len(text) > 7:
             try:
                 base64_string = text.split(" ", 1)[1]
-            except:
-                return
-            string = await decode(base64_string)
-            argument = string.split("-")
-            if len(argument) == 3:
-                try:
+                string = await decode(base64_string)
+                argument = string.split("-")
+                
+                if len(argument) == 3:
                     start = int(int(argument[1]) / abs(client.db_channel.id))
                     end = int(int(argument[2]) / abs(client.db_channel.id))
-                except:
-                    return
-                if start <= end:
                     ids = range(start, end + 1)
-                else:
-                    ids = []
-                    i = start
-                    while True:
-                        ids.append(i)
-                        i -= 1
-                        if i < end:
-                            break
-            elif len(argument) == 2:
-                try:
+                elif len(argument) == 2:
                     ids = [int(int(argument[1]) / abs(client.db_channel.id))]
-                except:
+                else:
+                    await message.reply_text("Invalid batch link format.")
                     return
-            temp_msg = await message.reply("Please wait...")
-            try:
-                messages = await get_messages(client, ids)
-            except:
-                await message.reply_text("Something went wrong..!")
-                return
-            await temp_msg.delete()
 
-            for msg in messages:
-                if bool(CUSTOM_CAPTION) & bool(msg.document):
-                    caption = CUSTOM_CAPTION.format(previouscaption="" if not msg.caption else msg.caption.html,
-                                                    filename=msg.document.file_name)
-                else:
-                    caption = "" if not msg.caption else msg.caption.html
-
-                if DISABLE_CHANNEL_BUTTON:
-                    reply_markup = msg.reply_markup
-                else:
-                    reply_markup = None
-
+                temp_msg = await message.reply("Please wait...")
                 try:
-                    sent_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML,
-                                              reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
-                    await asyncio.sleep(0.5)
-                    if DELETE_AFTER > 0:
-                        await message.reply_text(f"**NOTE - THIS MESSAGE WILL BE DELETED AFTER {MIN} minutes. \n REASON - COPYRIGHT AND REPORT ISSUES.**")
-                        await asyncio.sleep(DELETE_AFTER)  # Wait for DELETE_AFTER seconds
-                        await sent_msg.delete()  # Delete the message
-                except FloodWait as e:
-                    await asyncio.sleep(e.x)
-                    sent_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML,
-                                              reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
-                    if DELETE_AFTER > 0:
-                        await message.reply_text(f"**NOTE - THIS MESSAGE WILL BE DELETED AFTER {MIN} minutes. \n REASON - COPYRIGHT AND REPORT ISSUES.**")
-                        await asyncio.sleep(DELETE_AFTER)  # Wait for DELETE_AFTER seconds
-                        await sent_msg.delete()  # Delete the message
-                except:
-                    pass
-            return
+                    messages = await get_messages(client, ids)
+                except Exception as e:
+                    await message.reply_text(f"Error fetching messages: {e}")
+                    return
+                await temp_msg.delete()
 
-    # Default start message if no command_param or other actions
+                for msg in messages:
+                    try:
+                        caption = CUSTOM_CAPTION.format(previouscaption="" if not msg.caption else msg.caption.html, filename=msg.document.file_name) if bool(CUSTOM_CAPTION) & bool(msg.document) else None
+                        reply_markup = msg.reply_markup if not DISABLE_CHANNEL_BUTTON else None
+
+                        sent_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML, reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
+                        await asyncio.sleep(0.5)
+
+                        if DELETE_AFTER > 0:
+                            await message.reply_text(f"**NOTE - THIS MESSAGE WILL BE DELETED AFTER {MIN} minutes. \n REASON - COPYRIGHT AND REPORT ISSUES.**")
+                            await asyncio.sleep(DELETE_AFTER)
+                            await sent_msg.delete()
+
+                    except FloodWait as e:
+                        await asyncio.sleep(e.x)
+                        sent_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML, reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
+
+                        if DELETE_AFTER > 0:
+                            await message.reply_text(f"**NOTE - THIS MESSAGE WILL BE DELETED AFTER {MIN} minutes. \n REASON - COPYRIGHT AND REPORT ISSUES.**")
+                            await asyncio.sleep(DELETE_AFTER)
+                            await sent_msg.delete()
+
+                    except Exception as e:
+                        logger.error(f"Error sending message: {e}")
+
+            except IndexError:
+                await message.reply_text("Invalid command format.")
+
+    # Default start message if no batch link is provided or other actions
     reply_markup = InlineKeyboardMarkup(
         [
             [
@@ -382,24 +337,14 @@ async def start_command(client: Client, message: Message):
         disable_web_page_preview=True,
         quote=True
     )
-    return
 
-
-
-
-
-
-
-
-@Bot.on_message(filters.command('users') & filters.private & filters.user(ADMINS))
+@Bot.on_message(filters.private & filters.command('users') & filters.user(ADMINS))
 async def get_users(client: Bot, message: Message):
-    msg = await client.send_message(chat_id=message.chat.id, text=WAIT_MSG)
-    users = await full_userbase()
-    await msg.edit(f"{len(users)} users are using this bot")
-
-
-
-
+    try:
+        users = await full_userbase()
+        await message.reply(f"{len(users)} users are using this bot")
+    except Exception as e:
+        await message.reply(f"Failed to fetch user count: {e}")
 
 @Bot.on_message(filters.private & filters.command('broadcast') & filters.user(ADMINS))
 async def send_text(client: Bot, message: Message):
@@ -446,4 +391,3 @@ Unsuccessful: <code>{unsuccessful}</code></b>"""
         msg = await message.reply(REPLY_ERROR)
         await asyncio.sleep(8)
         await msg.delete()
-
